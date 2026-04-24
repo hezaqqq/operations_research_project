@@ -31,11 +31,39 @@ def read_txt(filename):
         "O": orders
     }
 
-data = read_txt('tables/tab_1.txt')
+def compute_potentials(C, basic):
+    n = len(C)
+    m = len(C[0])
 
-print(f"Dimensions: {data['n']} rows x {data['m']} columns")
-print(f"Provisions (P): {data['P']}")
-print(f"Orders (O): {data['O']}")
-print("Cost Matrix (C):")
-for row in data['C']:
-    print(row)
+    u = [None] * n
+    v = [None] * m
+
+    u[0] = 0
+
+    changed = True
+    while changed:
+        changed = False
+
+        for i, j in basic:
+            if u[i] is not None and v[j] is None:
+                v[j] = C[i][j] - u[i]
+                changed = True
+            elif v[j] is not None and u[i] is None:
+                u[i] = C[i][j] - v[j]
+                changed = True
+
+    return u, v
+
+
+def display(data):
+    print("Cost matrix :")
+    for row in data["C"]:
+        for x in row:
+            print(f"{x:4}", end=" ")
+        print()
+    print()
+    print("----------------")
+
+
+data = read_txt('tables/tab_12.txt')
+display(data)
