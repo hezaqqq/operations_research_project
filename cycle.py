@@ -60,7 +60,7 @@ def cycle_test(filename, used):
                     # on a donc ici le cycle qui est détecté et on va essayer de redonner le chemin
                         cycle = get_path(visited, curr, neighbor)
 
-                        print(f"We have a cycle !\nPath : {cycle}")   #ici on a le cycle classique. aux  index impair on fait + 1 pour trouver la bonne colonne et pour les pair on fait index - n pour trouver le customer
+                        print(f"We have a cycle !\nPath : {cycle}")   #ici on a le cycle classique. aux  index impair on fait + 1 pour trouver la bon producer et pour les pairs on fait index - n pour trouver le customer
 
                     # Ici on a sous forme de customer et producteur
                         real_path = []
