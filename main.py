@@ -1,5 +1,6 @@
 from north_west import north_west
 from balas_hammer import bh
+from complexity import writeTransportToFile
 
 class ConstraintTable:
     def __init__(self, width: int, height: int, costs: list[list[int]], provisions: list[int], orders: list[int], proposal: list[list[int]] | None = None):
@@ -137,12 +138,44 @@ def main():
     data = None
 
     while data is None:
-        table_name = input("Enter problem number > ")
-        try:
-            data = read_txt("tables/tab_" + str(table_name) + ".txt")
+        print("\nWhat type of transportation problem do you want to use?")
+        print("1. Pre-made transportation problems")
+        print("2. Generate random problems (complexity study)")
+        user_in = input("> ")
+        print("")
+        if user_in == "1":
 
-        except FileNotFoundError:
-            print("Invalid problem number")
+            table_name = input("Enter problem number (1-12) > ")
+            try:
+                data = read_txt("tables/tab_" + str(table_name) + ".txt")
+
+            except FileNotFoundError:
+                print("Invalid problem number")
+
+        elif user_in == "2":
+            size = input("Enter the size of the table (n): ")
+
+            try:
+                size = int(size)
+                writeTransportToFile(size)
+                data = read_txt("tables/tab_complexity.txt")
+                table_name = "complexity"
+            except ValueError:
+                print("Enter a valid integer")
+
+    print("\n tab_" + str(table_name) + ".txt")
+    # Print cost matrix with provisions
+    for i, row in enumerate(data.costs):
+        for x in row:
+            print(f"{x:4}", end=" ")
+
+        print(f" | {data.provisions[i]:4}")
+
+    print("-----" * len(data.orders))
+    for x in data.orders:
+        print(f"{x:4}", end=" ")
+
+    print("\n")
 
     data.display_costs()
 
