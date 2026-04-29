@@ -30,7 +30,7 @@ class ConstraintTable:
 
         # add fake supplier (add row)
         elif total_provisions < total_orders:
-            new_row_provisions = total_provisions - total_orders
+            new_row_provisions = total_orders - total_provisions
 
             self.costs.append([0] * self.width)
             self.provisions.append(new_row_provisions)
