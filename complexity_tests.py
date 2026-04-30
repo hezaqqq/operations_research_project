@@ -4,7 +4,7 @@ from north_west import north_west
 from balas_hammer import bh
 
 def test():
-    sizes = [10, 40]
+    sizes = [10, 40, 10**2, 4*10**2, 10**3, 4*10**3, 10**4]
     runs = 100
 
     print(f"{'n':>8} | {'North West (s)':>14} | {'Balas Hammer (s)':>16}")
