@@ -41,7 +41,7 @@ def potential_cost(quantity_matrix, cost_matrix):
     return potentials
 
 
-def marginal_cost_matrix(cost_matrix, potential_cost):
+def marginal_cost(cost_matrix, potential_cost):
     marginals = [[0] * len(cost_matrix[0]) for _ in range(len(cost_matrix))]
 
     for i in range(len(cost_matrix)):
@@ -51,7 +51,7 @@ def marginal_cost_matrix(cost_matrix, potential_cost):
     return marginals
 
 
-def display_potential_cost(potential_table):
+def display_potential(potential_table):
     n_sources = len(potential_table)
     n_clients = len(potential_table[0])
     col_width = 14
@@ -76,7 +76,7 @@ def display_potential_cost(potential_table):
     print("-" * (col_width * (n_clients + 1)))
 
 
-def display_marginal_cost(marginal_table):
+def display_marginal(marginal_table):
     n_sources = len(marginal_table)
     n_clients = len(marginal_table[0])
     col_width = 14
@@ -105,7 +105,7 @@ provision = [[25, 0, 0], [10, 15, 0], [0, 5, 20]]
 cost = [[5, 7, 8], [6, 8, 5], [6, 7, 7]]
 
 potential = potential_cost(provision, cost)
-marginal = marginal_cost_matrix(cost, potential)
+marginal = marginal_cost(cost, potential)
 
-display_potential_cost(potential)
-display_marginal_cost(marginal)
+display_potential(potential)
+display_marginal(marginal)
