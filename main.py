@@ -40,7 +40,7 @@ class ConstraintTable:
         if self.proposal is None:
             return 0.0
         return sum(
-            self.costs[i][j] * self.proposal[i][j]
+            self.costs[i][j] * (self.proposal[i][j] if self.proposal[i][j] is not None else 0)
             for i in range(self.height)
             for j in range(self.width)
         )
