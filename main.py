@@ -132,7 +132,7 @@ def load_problem() -> tuple[ConstraintTable, str]:
             try:
                 return read_txt(filename), number
             except FileNotFoundError:
-                print(f"[Error] File not found: {filename}")
+                print(f"File not found: {filename}")
 
         elif choice == "2":
             size_str = input("Enter table size (n): ").strip()
@@ -141,11 +141,11 @@ def load_problem() -> tuple[ConstraintTable, str]:
                 writeTransportToFile(size)
                 return read_txt("tables/tab_complexity.txt"), f"complexity ({size}x{size})"
             except ValueError:
-                print("[Error] Please enter a valid integer.")
+                print("Please enter a valid integer.")
             except FileNotFoundError:
-                print("[Error] Could not read generated file.")
+                print("Could not read generated file.")
         else:
-            print("[Error] Please enter 1 or 2.")
+            print("Please enter 1 or 2.")
 
 
 def choose_initial_algorithm(data: ConstraintTable):
@@ -170,7 +170,7 @@ def choose_initial_algorithm(data: ConstraintTable):
             return
 
         else:
-            print("[Error] Please enter 1 or 2.")
+            print("Please enter 1 or 2.")
 
 def main():
     run_another = True
