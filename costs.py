@@ -97,13 +97,3 @@ def display_marginal(marginal_table):
         print(row)
 
     print("-" * (col_width * (n_clients + 1)))
-
-
-provision = [[25, 0, 0], [10, 15, 0], [0, 5, 20]]
-cost = [[5, 7, 8], [6, 8, 5], [6, 7, 7]]
-
-potential = potential_cost(provision, cost)
-marginal = marginal_cost(cost, potential)
-
-display_potential(potential)
-display_marginal(marginal)
