@@ -1,6 +1,6 @@
 import numpy as np
 
-def potential_marginal(quantity_matrix, cost_matrix):
+def potential_cost(quantity_matrix, cost_matrix):
     # we need to find all the routes that have provisions and their respective cost
     considered_routes = []
     linsysoffset = len(quantity_matrix)
@@ -12,6 +12,7 @@ def potential_marginal(quantity_matrix, cost_matrix):
                 considered_routes.append((i, j + linsysoffset, cost_matrix[i][j]))
 
     print("Considered routes:", considered_routes)
+    print()
 
     # then we need to make the linear system and solve it to get the real values of E()
     temp_arr1 = [[0] * n_vars for _ in range(n_vars)]
@@ -33,22 +34,52 @@ def potential_marginal(quantity_matrix, cost_matrix):
 
     # now we can compute the potential costs matrix
     potentials = [[0] * len(quantity_matrix[0]) for _ in range(len(quantity_matrix))]
-    marginals = [[0] * len(quantity_matrix[0]) for _ in range(len(quantity_matrix))]
 
     for i in range(len(quantity_matrix)):
         for j in range(len(quantity_matrix[0])):
             potentials[i][j] = round(x[i] - x[j + linsysoffset])
-            marginals[i][j] = cost_matrix[i][j] - potentials[i][j]
-    return potentials, marginals
+
+    return potentials
+
+
+def marginal_cost_matrix(cost_matrix, potential_cost):
+    marginals = [[0] * len(cost_matrix[0]) for _ in range(len(cost_matrix))]
+
+    for i in range(len(cost_matrix)):
+        for j in range(len(cost_matrix[0])):
+            marginals[i][j] = cost_matrix[i][j] - potential_cost[i][j]
+
+    return marginals
+
+
+def display_potential_cost(potential_table):
+    n_sources = len(potential_table)
+    n_clients = len(potential_table[0])
+    col_width = 14
+
+    header = "Potential cost"
+    for j in range(n_clients):
+        header += f"C{j+1}".center(col_width)
+
+    print(header)
+    print("-" * (col_width * (n_clients + 1)))
+
+    # source rows: show potential cost and actual cost, and marginal cost
+    for i in range(n_sources):
+        row = f"S{i+1}".center(col_width)
+
+        for j in range(n_clients):
+            cell = f"{potential_table[i][j]}"
+            row += cell.center(col_width)
+        print(row)
+
+    print("-" * (col_width * (n_clients + 1)))
 
 
 provision = [[25, 0, 0], [10, 15, 0], [0, 5, 20]]
 cost = [[5, 7, 8], [6, 8, 5], [6, 7, 7]]
 
-potential, marginal = potential_marginal(provision, cost)
-print("Potential cost table:")
-for row in potential:
-    print(row)
-print("Marginal cost table:")
-for row in marginal:
-    print(row)
+potential = potential_cost(provision, cost)
+marginal = marginal_cost_matrix(cost, potential)
+
+display_potential_cost(potential)
