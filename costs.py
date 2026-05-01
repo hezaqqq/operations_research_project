@@ -64,7 +64,6 @@ def display_potential(potential_table):
     print(header)
     print("-" * (col_width * (n_clients + 1)))
 
-    # source rows: show potential cost and actual cost, and marginal cost
     for i in range(n_sources):
         row = f"S{i+1}".center(col_width)
 
@@ -89,7 +88,6 @@ def display_marginal(marginal_table):
     print(header)
     print("-" * (col_width * (n_clients + 1)))
 
-    # source rows: show potential cost and actual cost, and marginal cost
     for i in range(n_sources):
         row = f"S{i+1}".center(col_width)
 
