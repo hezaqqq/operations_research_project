@@ -1,7 +1,5 @@
 import random
 
-import random
-
 def complexityTransportationProblems(n):
     # Matrix A
     A = []

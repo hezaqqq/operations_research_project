@@ -17,20 +17,29 @@ def get_path(parent_dict, start, end):
     path_start.reverse()
     path_end.reverse()
 
-    i=0
+    i = 0
     while i < len(path_start) and i < len(path_end) and path_start[i] == path_end[i]:
         i += 1
 
-    return path_start[i-1:] + path_end[i:][::-1]
+    return path_start[i - 1:] + path_end[i:][::-1]
 
 
-def cycle_test(filename, used):
-    with open(filename, 'r') as f:
-        first_line = f.readline().split()
-        n = int(first_line[0])
-        m = int(first_line[1])
+def get_used_from_proposal(table):
+    used = []
+    for i in range(table.height):  # Lignes (Producteurs)
+        for j in range(table.width):  # Colonnes (Clients)
+            if table.proposal[i][j] is not None:
+                used.append((i, j))
+    return used
 
-    # adhency mat
+
+def cycle(table):
+    n = table.height
+    m = table.width
+
+    used = get_used_from_proposal(table)
+
+    # Création de la liste d'adjacence
     adj = {i: [] for i in range(n + m)}
     for r, c in used:
         u = r
@@ -38,7 +47,6 @@ def cycle_test(filename, used):
         adj[u].append(v)
         adj[v].append(u)
 
-    # BFS pour trouver si on a un cycle
     visited = {}
     queue = deque()
 
@@ -48,44 +56,28 @@ def cycle_test(filename, used):
             visited[i] = -1
 
             while queue:
-                item = queue.popleft()
-                curr = item[0]
-                parent = item[1]
+                curr, parent = queue.popleft()
 
                 for neighbor in adj[curr]:
                     if neighbor == parent:
                         continue
 
                     if neighbor in visited:
-                    # on a donc ici le cycle qui est détecté et on va essayer de redonner le chemin
-                        cycle = get_path(visited, curr, neighbor)
+                        # Cycle trouvé
+                        found_cycle = get_path(visited, curr, neighbor)
 
-                        print(f"We have a cycle !\nPath : {cycle}")   #ici on a le cycle classique. aux  index impair on fait + 1 pour trouver la bon producer et pour les pairs on fait index - n pour trouver le customer
-
-                    # Ici on a sous forme de customer et producteur
+                        # Affichage pour debug
                         real_path = []
-                        for node in cycle:
+                        for node in found_cycle:
                             if node < n:
                                 real_path.append(f"P{node + 1}")
                             else:
                                 real_path.append(f"C{node - n + 1}")
-                        print("Real physical path :", " -> ".join(real_path))
 
-                        return True, cycle
+                        print(f"Cycle détecté : {' -> '.join(real_path)}")
+                        return True, found_cycle
 
                     visited[neighbor] = curr
                     queue.append((neighbor, curr))
 
-    print("No cycle found -> Acyclic")
-    return False
-
-
-# Exemple aveec le graph exemple du cours pas avec un des 12 graphs (à ne pas garder, c'était pour voir comment ça amrche)
-with_cycle = [(0, 0), (0, 1), (1, 1), (1, 0)]
-without_cycle = [(0, 0), (0, 1), (1, 1)]
-
-print("Si on a un cycle -->")
-cycle_test('Tab1.txt', with_cycle)
-
-print("\nSi on n'a pas de cycle -->")
-cycle_test('Tab1.txt', without_cycle)
+    return False, None

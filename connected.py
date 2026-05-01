@@ -1,3 +1,5 @@
+from collections import deque
+
 def connected(n, m, used):
 
     adj = {i: [] for i in range(n + m)}

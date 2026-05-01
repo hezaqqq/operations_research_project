@@ -1,207 +1,209 @@
 from north_west import north_west
 from balas_hammer import bh
 from complexity import writeTransportToFile
+from stepping_stone import stepping_stone
 
 class ConstraintTable:
-    def __init__(self, width: int, height: int, costs: list[list[int]], provisions: list[int], orders: list[int], proposal: list[list[int]] | None = None):
+    def __init__(self, width: int, height: int, costs: list[list[int]],
+                 provisions: list[int], orders: list[int],
+                 proposal: list[list[int]] | None = None):
         self.width = width
         self.height = height
         self.costs = costs
         self.provisions = provisions
         self.orders = orders
-
         self.proposal = proposal
 
     def is_equilibrium(self) -> bool:
         return sum(self.orders) == sum(self.provisions)
 
     def equilibrate(self):
-        total_orders = sum(self.orders)
-        total_provisions = sum(self.provisions)
+        total_supply = sum(self.provisions)
+        total_demand = sum(self.orders)
 
-        # add fake customer (add column)
-        if total_orders < total_provisions:
-            new_col_orders = total_provisions - total_orders
-
-            for row in range(self.height):
-                self.costs[row].append(0)
-
-            self.orders.append(new_col_orders)
+        if total_demand < total_supply:
+            # Add a dummy customer (new column with zero cost)
+            surplus = total_supply - total_demand
+            for row in self.costs:
+                row.append(0)
+            self.orders.append(surplus)
             self.width += 1
 
-        # add fake supplier (add row)
-        elif total_provisions < total_orders:
-            new_row_provisions = total_orders - total_provisions
-
+        elif total_supply < total_demand:
+            # Add a dummy supplier (new row with zero cost)
+            surplus = total_demand - total_supply
             self.costs.append([0] * self.width)
-            self.provisions.append(new_row_provisions)
+            self.provisions.append(surplus)
             self.height += 1
-
-        # (it the provisions and orders are the same, we are at equilibrium, so don't do anything)
-
 
     def proposal_cost(self) -> float:
         if self.proposal is None:
             return 0.0
+        return sum(
+            self.costs[i][j] * self.proposal[i][j]
+            for i in range(self.height)
+            for j in range(self.width)
+        )
 
-        result = 0
+    def display_constraint_table(self):
+        col_w = 6
+        sep = "-" * (col_w * (self.width + 2))
 
-        for y in range(self.height):
-            for x in range(self.width):
-                result += self.costs[y][x] * self.proposal[y][x]
+        print("\nConstraint table:")
+        print(sep)
 
-        return result
+        # Header
+        header = "".center(col_w)
+        header += "".join(f"C{j+1}".center(col_w) for j in range(self.width))
+        header += "Supply".center(col_w)
+        print(header)
+        print(sep)
 
+        # Rows
+        for i in range(self.height):
+            row =f"P{i+1}".center(col_w)
+            row += "".join(str(self.costs[i][j]).center(col_w) for j in range(self.width))
+            row += str(self.provisions[i]).center(col_w)
+            print(row)
 
-    def display_costs(self):
-        print("Cost matrix :")
-        for row in self.costs:
-            for x in row:
-                print(f"{x:4}", end=" ")
-            print()
-        print()
-        print("----------------")
+        print(sep)
 
+        # Demand row
+        demand_row = "Demand".center(col_w)
+        demand_row += "".join(str(self.orders[j]).center(col_w) for j in range(self.width))
+        print(demand_row)
+        print( sep)
 
     def display_proposal(self):
-        print("Proposal :")
-        y = 0
-        for row in self.proposal:
-            for x in row:
-                print(f"{x:4}", end=" ")
+        col_w = 8
+        sep = "-" * (col_w * (self.width + 2))
 
-            print(f"  | {self.provisions[y]:4}  ")
-            y += 1
+        print("\nInitial transport proposal:")
+        print(sep)
 
-        for x in self.proposal[0]:
-            print(".....", end="")
-        print()
+        header = "".center(col_w)
+        header += "".join(f"C{j+1}".center(col_w) for j in range(self.width))
+        header += "Supply".center(col_w)
+        print(header)
+        print(sep)
 
-        for x in self.orders:
-            print(f"{x:4}", end=" ")
-        print()
-        print()
-        print("----------------")
+        for i in range(self.height):
+            row = f"P{i+1}".center(col_w)
+            row += "".join(
+                (str(self.proposal[i][j]) if self.proposal[i][j] is not None else "-").center(col_w)
+                for j in range(self.width)
+            )
+            row += str(self.provisions[i]).center(col_w)
+            print(row)
 
+        print(sep)
+        demand_row = "Demand".center(col_w)
+        demand_row += "".join(str(self.orders[j]).center(col_w) for j in range(self.width))
+        print(demand_row)
+        print(sep)
 
-def read_txt(filename):
-    with open(filename, 'r') as file:
-        lines = []
-        for line in file:
-            stripped = line.strip()
-            if stripped:
-                lines.append(stripped)
+def read_txt(filename: str) -> ConstraintTable:
+    with open(filename, 'r') as f:
+        lines = [line.strip() for line in f if line.strip()]
 
-    first_line = lines[0].split()
-    n = int(first_line[0])
-    m = int(first_line[1])
+    n, m = map(int, lines[0].split())
 
-    cost_matrix = []
+    costs = []
     provisions = []
-
     for i in range(1, 1 + n):
-        row_values = list(map(int, lines[i].split()))
-        costs = row_values[:m]
-        provision = row_values[m]
-
-        cost_matrix.append(costs)
-        provisions.append(provision)
+        values = list(map(int, lines[i].split()))
+        costs.append(values[:m])
+        provisions.append(values[m])
 
     orders = list(map(int, lines[1 + n].split()))
 
-    return ConstraintTable(m, n, cost_matrix, provisions, orders)
+    return ConstraintTable(m, n, costs, provisions, orders)
+
+def load_problem() -> tuple[ConstraintTable, str]:
+    while True:
+        print("What type of transportation problem do you want to use?")
+        print("1. Pre-made problems (1–12)")
+        print("2. Generate a random problem (complexity study)")
+        choice = input("  > ").strip()
+
+        if choice == "1":
+            number = input("Enter problem number (1–12): ").strip()
+            filename = f"tables/tab_{number}.txt"
+            try:
+                return read_txt(filename), number
+            except FileNotFoundError:
+                print(f"[Error] File not found: {filename}")
+
+        elif choice == "2":
+            size_str = input("Enter table size (n): ").strip()
+            try:
+                size = int(size_str)
+                writeTransportToFile(size)
+                return read_txt("tables/tab_complexity.txt"), f"complexity ({size}x{size})"
+            except ValueError:
+                print("[Error] Please enter a valid integer.")
+            except FileNotFoundError:
+                print("[Error] Could not read generated file.")
+        else:
+            print("[Error] Please enter 1 or 2.")
 
 
-def compute_potentials(data: ConstraintTable, basic):
-    costs = data.costs
-    u = [None] * data.width
-    v = [None] * data.height
+def choose_initial_algorithm(data: ConstraintTable):
+    while True:
+        print("\nWhich algorithm should be used to build the initial proposal?")
+        print("1. North-West")
+        print("2. Balas-Hammer")
+        choice = input("  > ").strip()
 
-    u[0] = 0
+        if choice == "1":
+            data.proposal = north_west(data.provisions[:], data.orders[:])
+            print("\n[North-West] Initial proposal built.")
+            data.display_proposal()
+            print(f"\nInitial transport cost: {data.proposal_cost()}")
+            return
 
-    changed = True
-    while changed:
-        changed = False
+        elif choice == "2":
+            data.proposal = bh(data.costs, data.provisions[:], data.orders[:])
+            print("\n[Balas-Hammer] Initial proposal built.")
+            data.display_proposal()
+            print(f"\nInitial transport cost: {data.proposal_cost()}")
+            return
 
-        for i, j in basic:
-            if u[i] is not None and v[j] is None:
-                v[j] = costs[i][j] - u[i]
-                changed = True
-            elif v[j] is not None and u[i] is None:
-                u[i] = costs[i][j] - v[j]
-                changed = True
-
-    return u, v
-
+        else:
+            print("[Error] Please enter 1 or 2.")
 
 def main():
-    data = None
+    run_another = True
 
-    while data is None:
-        print("\nWhat type of transportation problem do you want to use?")
-        print("1. Pre-made transportation problems")
-        print("2. Generate random problems (complexity study)")
-        user_in = input("> ")
-        print("")
-        if user_in == "1":
+    while run_another:
 
-            table_name = input("Enter problem number (1-12) > ")
-            try:
-                data = read_txt("tables/tab_" + str(table_name) + ".txt")
+        data, label = load_problem()
+        print("tab_" + str(label) + ".txt")
 
-            except FileNotFoundError:
-                print("Invalid problem number")
+        data.display_constraint_table()
 
-        elif user_in == "2":
-            size = input("Enter the size of the table (n): ")
+        if data.is_equilibrium():
+            print("\n[Equilibrium] Supply equals demand")
+        else:
+            total_s = sum(data.provisions)
+            total_d = sum(data.orders)
+            print(f"\n[Not balanced] Supply={total_s}, Demand={total_d} — adding dummy {'customer' if total_d < total_s else 'supplier'}...")
+            data.equilibrate()
+            print("Adjusted constraint table:")
+            data.display_constraint_table()
 
-            try:
-                size = int(size)
-                writeTransportToFile(size)
-                data = read_txt("tables/tab_complexity.txt")
-                table_name = "complexity"
-            except ValueError:
-                print("Enter a valid integer")
+        choose_initial_algorithm(data)
 
-    print("\n tab_" + str(table_name) + ".txt")
-    # Print cost matrix with provisions
-    for i, row in enumerate(data.costs):
-        for x in row:
-            print(f"{x:4}", end=" ")
+        print(f"\n{'-'*70}")
+        print("Stepping-stone method with potentials")
+        stepping_stone(data)
 
-        print(f" | {data.provisions[i]:4}")
-
-    print("-----" * len(data.orders))
-    for x in data.orders:
-        print(f"{x:4}", end=" ")
-
-    print("\n")
-
-    data.display_costs()
-
-    if data.is_equilibrium():
-        print("Equilibrium")
-    else:
-        print("Not Equilibrium")
-        data.equilibrate()
-        print("Adjusted to:")
-        data.display_costs()
-
-    print("Which algorithm would you like to use to fix the initial proposal?")
-    print("1: North-West")
-    print("2: Balas-Hammer")
-    user_in = input("> ")
-
-    if user_in == "1":
-        data.proposal = north_west(data.provisions[:], data.orders[:])
-        data.display_proposal()
-    elif user_in == "2":
-        data.proposal = bh(data.costs, data.provisions[:], data.orders[:])
-        data.display_proposal()
-
-    print(f"Current cost: {data.proposal_cost()}")
-
+        print("\n Would you like to solve another transportation problem?")
+        print("1. Yes")
+        print("2. No")
+        again = input("  > ").strip()
+        print()
+        run_another = (again == "1")
 
 if __name__ == "__main__":
     main()
-
