@@ -1,6 +1,6 @@
 import numpy as np
 
-def potential_cost_table(quantity_matrix, cost_matrix):
+def potential_marginal(quantity_matrix, cost_matrix):
     # we need to find all the routes that have provisions and their respective cost
     considered_routes = []
     linsysoffset = len(quantity_matrix)
@@ -32,18 +32,23 @@ def potential_cost_table(quantity_matrix, cost_matrix):
     x = np.linalg.solve(a, b) # this should contain the E()s of the sources then the customers
 
     # now we can compute the potential costs matrix
-    table = [[0] * len(quantity_matrix[0]) for _ in range(len(quantity_matrix))]
+    potentials = [[0] * len(quantity_matrix[0]) for _ in range(len(quantity_matrix))]
+    marginals = [[0] * len(quantity_matrix[0]) for _ in range(len(quantity_matrix))]
+
     for i in range(len(quantity_matrix)):
         for j in range(len(quantity_matrix[0])):
-            table[i][j] = round(x[i] - x[j + linsysoffset])
-
-    return table
+            potentials[i][j] = round(x[i] - x[j + linsysoffset])
+            marginals[i][j] = cost_matrix[i][j] - potentials[i][j]
+    return potentials, marginals
 
 
 provision = [[25, 0, 0], [10, 15, 0], [0, 5, 20]]
 cost = [[5, 7, 8], [6, 8, 5], [6, 7, 7]]
 
-potential = potential_cost_table(provision, cost)
+potential, marginal = potential_marginal(provision, cost)
 print("Potential cost table:")
 for row in potential:
+    print(row)
+print("Marginal cost table:")
+for row in marginal:
     print(row)
