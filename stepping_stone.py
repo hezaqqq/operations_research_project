@@ -61,7 +61,6 @@ def ensure_base_complete(table):
             if creates_cycle:
                 table.proposal[r][c] = None
             else:
-                print(f"[Degeneracy] Added degenerate cell: (P{r+1}, C{c+1}) = 0")
                 break
 
 def find_cycle_for_cell(start_row, start_col, table):
@@ -137,8 +136,6 @@ def pivot(table, cycle_path):
                 leaving_cell = (r, c)
                 break
 
-    print(f"[Pivot] Pivot={theta}, leaving cell: (P{leaving_cell[0]+1}, C{leaving_cell[1]+1})")
-
     # Apply updates
     for k in range(len(cycle_path)):
         r, c = cycle_path[k]
@@ -157,93 +154,11 @@ def pivot(table, cycle_path):
     r, c = leaving_cell
     table.proposal[r][c] = None
 
-def display_proposal(table):
-    n = table.height
-    m = table.width
-    col_w = 8
-
-    print("\nTransport proposal:")
-    print("-" * (col_w * (m + 2)))
-
-    header = "".center(col_w)
-
-    for j in range(m):
-        header += f"C{j+1}".center(col_w)
-
-    header += "Supply".center(col_w)
-
-    print(header)
-    print("-" * (col_w * (m + 2)))
-
-    for i in range(n):
-        row = f"P{i+1}".center(col_w)
-
-        for j in range(m):
-            val = table.proposal[i][j]
-            if val is None:
-                row += "-".center(col_w)
-            else:
-                row += str(val).center(col_w)
-
-        row += str(table.provisions[i]).center(col_w)
-        print(row)
-
-    print("-" * (col_w * (m + 2)))
-
-    demand_row = "Demand".center(col_w)
-    for j in range(m):
-        demand_row += str(table.orders[j]).center(col_w)
-
-    print(demand_row)
-    print("-" * (col_w * (m + 2)))
-
-def display_cost_table(table, u, v, marginals):
-    n = table.height
-    m = table.width
-    col_w = 10
-
-    print("\nPotential costs and marginal costs:")
-    print("-" * (col_w * (m + 1) * 2 + 6))
-
-    header = "".center(col_w)
-
-    for j in range(m):
-        header += f"C{j + 1}(pot)".center(col_w)
-
-    header += "  |  "
-
-    for j in range(m):
-        header += f"C{j + 1}(marg)".center(col_w)
-
-    print(header)
-    print("-" * (col_w * (m + 1) * 2 + 6))
-
-    for i in range(n):
-        row = f"P{i + 1}".center(col_w)
-
-        # Potential (u_i + v_j)
-        for j in range(m):
-            val = u[i] + v[j]
-            # Removed marker logic here
-            row += str(val).center(col_w)
-
-        row += "  |  "
-
-        # Marginal (Actual Cost - Potential)
-        for j in range(m):
-            val = marginals[i][j]
-            # Removed marker logic here
-            row += str(val).center(col_w)
-        print(row)
-
-    print("-" * (col_w * (m + 1) * 2 + 6))
-
 def stepping_stone(table):
     iteration = 0
 
     while True:
         iteration += 1
-        print(f"Iteration {iteration}")
 
         n = table.height
         m = table.width
@@ -252,12 +167,8 @@ def stepping_stone(table):
         base_size = len(basic_cells)
 
         if base_size < n + m - 1:
-            print(f"\n[Degeneracy] Incomplete basis: {base_size} cells (expected {n+m-1})")
             ensure_base_complete(table)
             basic_cells = get_used_from_proposal(table)
-            print(f"[Degeneracy] Basis completed: {len(basic_cells)} cells")
-        else:
-            print(f"\n[Basis] {base_size} basic cells non-degenerate proposal")
 
         # Compute potentials
         u, v = compute_potentials(table)
@@ -267,8 +178,6 @@ def stepping_stone(table):
             [u[i] + v[j] for j in range(m)]
             for i in range(n)
         ])
-
-        display_cost_table(table, u, v, marginals)
 
         # Find entering path
         best_path = None
@@ -290,25 +199,8 @@ def stepping_stone(table):
                         best_path = (i, j, cycle_path)
 
         if best_path is None:
-            print("\nAll marginal costs >= 0: optimal solution reached.")
             break
 
         i_in, j_in, cycle_path = best_path
 
-        print(f"\n[Path] (P{i_in+1}, C{j_in+1}), marginal cost = {best_marginal}")
-
-        labels = []
-        for k in range(len(cycle_path)):
-            r, c = cycle_path[k]
-            sign = "+" if k % 2 == 0 else "-"
-            labels.append(f"{sign}(P{r+1},C{c+1})")
-
-        print("Cycle: " + " -> ".join(labels))
-
         pivot(table, cycle_path)
-
-    print("\n" + "-" * 70)
-    print("Optimal Solution:")
-    display_proposal(table)
-    print(f"\nMinimum transport cost: {table.proposal_cost()}")
-    print("-" * 70 + "\n")
