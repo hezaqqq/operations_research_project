@@ -197,17 +197,6 @@ def display_proposal(table):
     print(demand_row)
     print("-" * (col_w * (m + 2)))
 
-
-def display_potentials(u, v):
-    print("\n  Potentials:")
-
-    for i in range(len(u)):
-        print(f"    u[P{i+1}] = {u[i]}")
-
-    for j in range(len(v)):
-        print(f"    v[C{j+1}] = {v[j]}")
-
-
 def display_cost_table(table, u, v, marginals):
     n = table.height
     m = table.width
@@ -272,7 +261,6 @@ def stepping_stone(table):
 
         # Compute potentials
         u, v = compute_potentials(table)
-        display_potentials(u, v)
 
         # Compute marginal costs
         marginals = marginal_cost(table.costs, [
