@@ -1,0 +1,94 @@
+What type of transportation problem do you want to use?
+1. Pre-made problems (1–12)
+2. Generate a random problem (complexity study)
+  > 1
+Enter problem number (1–12): 7
+tab_7.txt
+
+Constraint table:
+------------------------
+        C1    C2  Supply
+------------------------
+  P1    50    20   100
+  P2    10    50   200
+  P3    50    40   100
+  P4    45    35   200
+------------------------
+Demand 300   300
+------------------------
+
+[Equilibrium] Supply equals demand
+
+Which algorithm should be used to build the initial proposal?
+1. North-West
+2. Balas-Hammer
+  > 1
+
+[North-West] Initial proposal built.
+
+Initial transport proposal:
+--------------------------------
+           C1      C2    Supply
+--------------------------------
+   P1     100      -      100
+   P2     200      -      200
+   P3      0      100     100
+   P4      -      200     200
+--------------------------------
+ Demand   300     300
+--------------------------------
+
+Initial transport cost: 18000
+
+----------------------------------------------------------------------
+Stepping-stone method with potentials
+Iteration 1
+
+[Basis] 5 basic cells non-degenerate proposal
+
+Potential costs and marginal costs:
+------------------------------------------------------------------
+           C1(pot)   C2(pot)    |   C1(marg)  C2(marg)
+------------------------------------------------------------------
+    P1        50        40      |      0        -20
+    P2        10        0       |      0         50
+    P3        50        40      |      0         0
+    P4        45        35      |      0         0
+------------------------------------------------------------------
+
+[Path] (P1, C2), marginal cost = -20
+Cycle: +(P1,C2) -> -(P1,C1) -> +(P3,C1) -> -(P3,C2)
+[Pivot] Pivot=100, leaving cell: (P1, C1)
+Iteration 2
+
+[Basis] 5 basic cells non-degenerate proposal
+
+Potential costs and marginal costs:
+------------------------------------------------------------------
+           C1(pot)   C2(pot)    |   C1(marg)  C2(marg)
+------------------------------------------------------------------
+    P1        30        20      |      20        0
+    P2        10        0       |      0         50
+    P3        50        40      |      0         0
+    P4        45        35      |      0         0
+------------------------------------------------------------------
+
+All marginal costs >= 0: optimal solution reached.
+
+----------------------------------------------------------------------
+Optimal Solution:
+
+Transport proposal:
+--------------------------------
+           C1      C2    Supply
+--------------------------------
+   P1      -      100     100
+   P2     200      -      200
+   P3     100      0      100
+   P4      -      200     200
+--------------------------------
+ Demand   300     300
+--------------------------------
+
+Minimum transport cost: 16000
+----------------------------------------------------------------------
