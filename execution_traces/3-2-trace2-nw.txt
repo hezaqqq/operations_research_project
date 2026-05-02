@@ -1,0 +1,69 @@
+What type of transportation problem do you want to use?
+1. Pre-made problems (1–12)
+2. Generate a random problem (complexity study)
+  > 1
+Enter problem number (1–12): 2
+tab_2.txt
+
+Constraint table:
+------------------------
+        C1    C2  Supply
+------------------------
+  P1    10    20   100
+  P2    30    10   100
+------------------------
+Demand 100   100
+------------------------
+
+[Equilibrium] Supply equals demand
+
+Which algorithm should be used to build the initial proposal?
+1. North-West
+2. Balas-Hammer
+  > 1
+
+[North-West] Initial proposal built.
+
+Initial transport proposal:
+--------------------------------
+           C1      C2    Supply
+--------------------------------
+   P1     100      -      100
+   P2      0      100     100
+--------------------------------
+ Demand   100     100
+--------------------------------
+
+Initial transport cost: 2000
+
+----------------------------------------------------------------------
+Stepping-stone method with potentials
+Iteration 1
+
+[Basis] 3 basic cells non-degenerate proposal
+
+Potential costs and marginal costs:
+------------------------------------------------------------------
+           C1(pot)   C2(pot)    |   C1(marg)  C2(marg)
+------------------------------------------------------------------
+    P1        10       -10      |      0         30
+    P2        30        10      |      0         0
+------------------------------------------------------------------
+
+All marginal costs >= 0: optimal solution reached.
+
+----------------------------------------------------------------------
+Optimal Solution:
+
+Transport proposal:
+--------------------------------
+           C1      C2    Supply
+--------------------------------
+   P1     100      -      100
+   P2      0      100     100
+--------------------------------
+ Demand   100     100
+--------------------------------
+
+Minimum transport cost: 2000
+----------------------------------------------------------------------
