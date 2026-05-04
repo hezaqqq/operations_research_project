@@ -37,7 +37,7 @@ def bh(cost_matrix, provisions, demands):
     n = len(cost_matrix)
     m = len(cost_matrix[0])
 
-    solution = [[0 for _ in range(m)] for _ in range(n)]
+    solution = [[None for _ in range(m)] for _ in range(n)]
 
     active_rows = [True] * n
     active_cols = [True] * m
@@ -95,7 +95,15 @@ def bh(cost_matrix, provisions, demands):
         demands[j] -= x
 
         if provisions[i] == 0 and demands[j] == 0:
-            active_rows[i] = False  # deactivate row, keep col active (degenerate case)
+            # Cell already allocated, but we need to signal degeneracy
+            # Deactivate both — the allocated zero already recorded keeps basis count correct
+            active_rows[i] = False
+            active_cols[j] = False
+            # If more iterations remain, inject an epsilon into the next available cell
+            next_rows = [r for r in range(n) if active_rows[r]]
+            next_cols = [c for c in range(m) if active_cols[c]]
+            if next_rows and next_cols:
+                solution[next_rows[0]][next_cols[0]] = 0  # epsilon basic cell
         elif provisions[i] == 0:
             active_rows[i] = False
         elif demands[j] == 0:
